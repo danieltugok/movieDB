@@ -5,18 +5,18 @@
     <div class="container">
         <ul>    
             <div class="row">
-            <li v-for="item in value" class="col-3 item-filme" v-bind:key="item.id" >            
+            <li v-for="item in value" class="col-3 item-filme pad15" v-bind:key="item.id" >            
                 <div class="card" >
                     <img v-if="item.poster_path" class="card-img-top img-fluid" :src='"http://image.tmdb.org/t/p/w500/" + item.poster_path' :alt="item.title">
                     <div class="card-body">
-                        <h5 class="card-title">{{ item.title }}</h5>
+                        <h5 class="card-title">{{ item.original_title }}</h5>
                         <div>
                             <i>star</i>
-                            <p class="card-text">{{ item.popularity.toFixed(2) }}</p>
+                            <p class="card-text">{{ item.vote_average.toFixed(2) }}</p>
                         </div>
                     </div>               
                     <div class="card-body">
-                        <button>Veja mais...</button>
+                        <button>Ver mais...</button>
                     </div>
                 </div>
             </li>
@@ -70,12 +70,17 @@ export default {
         list-style-type: none;
     }
 
+    .pad15{
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
     .content{
         margin-top: 50px;
     }
 
     .item-filme{
-        background-color: #ccc;
+        /* background-color: #ccc; */
     }
 
     .card{
