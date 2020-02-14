@@ -105,10 +105,12 @@ export default {
 
     methods:{
         getSearchList( value ){
-
             console.log( value );
+        },
 
-        }
+        verMaisBtnClicked(item){
+            this.$emit('verMaisBtnClicked', item);
+        },
 
     }
 

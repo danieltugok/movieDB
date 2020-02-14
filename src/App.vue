@@ -42,8 +42,8 @@ export default {
 
     searchBtnClicked( value ){
 
-        this.$refs.conteudo.getSearchList( value );
         this.$router.push({ path: '/search/' + value });
+        this.$refs.conteudo.getSearchList( value );
 
     }
   }
