@@ -1,28 +1,50 @@
 <template>
   <div class="content">
-    <h1>{{ msg }}</h1>
 
-    <div class="container">
+      {{componentKey}}
+
+    <div class="col-6 ml-auto">
+        <select @change="filterChange($event)" class="form-control filter" v-model="key">
+            <option value="" disabled selected>Filtrar por Gênero</option>
+            
+            <option v-for="genre in genres" :value="genre.id" :key="genre.id"> {{ genre.name }} </option>
+        </select>
+        
+    </div>
+
+    <br>
+
+    <div class="container" :key="this.componentKey">
         <ul>    
             <div class="row">
-            <li v-for="item in value" class="col-3 item-filme pad15" v-bind:key="item.id" >            
-                <div class="card" >
-                    <img v-if="item.poster_path" class="card-img-top img-fluid" :src='"http://image.tmdb.org/t/p/w500/" + item.poster_path' :alt="item.title">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ item.original_title }}</h5>
-                        <div>
-                            <i>star</i>
-                            <p class="card-text">{{ item.vote_average.toFixed(2) }}</p>
+                <li v-for="item in movies" class="col-3 item-filme pad15" :key="item.id" >            
+                    <div class="card" >
+                        <div ></div>
+                        <img v-if="item.poster_path" class="card-img-top img-fluid" :src='"http://image.tmdb.org/t/p/w500/" + item.poster_path' :alt="item.title">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.original_title }}</h5>
+                            <div>
+                                <i>star</i>
+                                <p class="card-text">{{ item.vote_average.toFixed(2) }}</p>
+                            </div>
+                        </div>               
+                        <div class="card-body">
+                            <button @click="verMaisBtnClicked(item.id)">Ver mais...</button>
                         </div>
-                    </div>               
-                    <div class="card-body">
-                        <button>Ver mais...</button>
                     </div>
-                </div>
-            </li>
+                </li>
             </div>
         </ul>
     </div>
+
+    <ul id="pagination">
+        <li class="pagination-item">
+            <button href="#" @click="prevBtnClicked" type="button" :disabled="pg <= 1" >Anterior</button>
+        </li>
+        <li class="pagination-item">
+            <button href="#" @click="nextBtnClicked" type="button" >Próxima</button>
+        </li>
+    </ul>
  
     
   </div>
@@ -30,13 +52,21 @@
 
 <script>
 export default {
-  props: {
-    msg: String
-  },
+    props: {
+        componentKey: {
+            type: Number,
+            default: 1
+        },
+    },
 
   data() {
     return {
-      value: null
+        movies: null,
+        genres: null,
+        pagination: [],
+        key: null,
+        pg: 1
+
 
     }
   },
@@ -44,16 +74,79 @@ export default {
 
   beforeCreate() {
         this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=primary_release_date.desc&include_adult=false&include_video=false&page=1')
-          .then((resp) => {
-              if(resp.status === 200) {
-                this.value = resp.data.results;
+            .then((resp) => {
+                if(resp.status === 200) {
+                this.movies = resp.data.results;
 
+                this.pagination.push(resp.data.page);
+                this.pagination.push(resp.data.total_results);
+                this.pagination.push(resp.data.total_pages);       
 
-                
-
-
-          }
+            }
         })
+
+
+
+        this.$http.get('https://api.themoviedb.org/3/genre/movie/list?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR')
+            .then((resp) => {
+                if(resp.status === 200) {
+                this.genres = resp.data.genres;
+
+                // console.log(this.genres);            
+
+            }
+        })
+
+    },
+
+    methods: {
+        verMaisBtnClicked(item){
+            this.$emit('verMaisBtnClicked', item);
+        },
+
+        filterChange(event) {
+            console.log(event.target.value)
+        },
+
+        nextBtnClicked() {            
+            this.pg++;            
+
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=primary_release_date.desc&include_adult=false&include_video=false&page='+ this.pg)
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.movies = resp.data.results;
+
+                    // this.pagination.push(resp.data.page);
+                    // this.pagination.push(resp.data.total_results);
+                    // this.pagination.push(resp.data.total_pages);
+
+
+                }
+            })
+
+            
+
+        },
+
+        prevBtnClicked() {
+
+            this.pg--;            
+
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=primary_release_date.desc&include_adult=false&include_video=false&page='+ this.pg)
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.movies = resp.data.results;
+
+                    // this.pagination.push(resp.data.page);
+                    // this.pagination.push(resp.data.total_results);
+                    // this.pagination.push(resp.data.total_pages);
+
+
+                }
+            })
+
+        },
+
 
     }
 

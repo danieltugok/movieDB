@@ -2,37 +2,51 @@
   <div id="app">
     <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
 
-    <Header msg="Header" v-on:searchBtnClicked="teste()"/>
+    <Header msg="Header" v-on:searchBtnClicked="searchBtnClicked"/>
 
-    <Content msg=""/>
+    <hr>
+    <router-link to="/">Home</router-link>
+    <router-link to="/sobre">Sobre</router-link>
+    <hr>
+
+
+    <router-view @verMaisBtnClicked="verMaisBtnClicked" ref="conteudo"></router-view>
+
 
   </div>
 </template>
 
 <script>
 import Header from './components/Header.vue'
-import Content from './components/Content.vue'
 
 export default {
   name: 'App',
   components: {
     Header,
-    Content,
+  },
+
+  data () {
+      return {
+
+      }
   },
 
 
 
   methods:{
 
-    teste( value ){
-      console.log( value );
+    verMaisBtnClicked( id ){
+        console.log( id );
+        this.$router.push({ path: '/details/' + id })
+    },
+
+    searchBtnClicked( value ){
+
+        this.$refs.conteudo.getSearchList( value );
+        this.$router.push({ path: '/search/' + value });
+
     }
-
-
   }
-
-
-
 
 
 }
