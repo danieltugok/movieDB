@@ -4,16 +4,19 @@
         <div class="container" :key="this.componentKey">
             <div class="row">
                 <div class="col-5 mr-auto">
-                    <label for="genreCheckbox" class="text-light"> Filtrar por Gênero</label>
-                    <select @change="filterChange($event)" class="form-control filter" v-model="key" name="genreCheckbox">
+                    <label for="genreCheckbox" class="text-light">Ordernação filmes</label>
+                    <select @change="filterSortByChange($event)" class="form-control filter" v-model="sortBy" name="genreCheckbox">
                         
-                        <option v-for="genre in genres" :value="genre.id" :key="genre.id"> {{ genre.name }} </option>
+                        <option value="original_title.asc">Ordem alfabética</option>
+                        <option value="release_date.desc">Ultimos lançamentos</option>
+                        <option value="popularity.desc">Popularidade</option>
+                        <option value="vote_average.desc">Avaliação</option>
                     </select>        
                 </div>
 
                 <div class="col-5 ml-auto">
                     <label for="genreCheckbox" class="text-light"> Filtrar por Gênero</label>
-                    <select @change="filterChange($event)" class="form-control filter" v-model="key" name="genreCheckbox">
+                    <select @change="filterGenresChange($event)" class="form-control filter" v-model="genresFilter" name="genreCheckbox">
                         
                         <option v-for="genre in genres" :value="genre.id" :key="genre.id"> {{ genre.name }} </option>
                     </select>        
@@ -31,7 +34,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ item.original_title }}</h5>
                                 <div>
-                                    <i>star</i>
+                                    <i class="fas fa-star"></i>
                                     <p class="card-text">{{ item.vote_average.toFixed(2) }}</p>
                                 </div>
                             </div>               
@@ -47,10 +50,10 @@
 
         <ul id="pagination" class="row justify-content-around">
             <li class="pagination-item">
-                <button href="#" @click="prevBtnClicked" type="button" :disabled="pg <= 1" >Anterior</button>
+                <button href="#" @click="prevBtnClicked" type="button" :disabled="pg <= 1" class="btn btn-light">Anterior</button>
             </li>
             <li class="pagination-item">
-                <button href="#" @click="nextBtnClicked" type="button" >Próxima</button>
+                <button href="#" @click="nextBtnClicked" type="button" class="btn btn-light">Próxima</button>
             </li>
         </ul> 
     
@@ -72,7 +75,9 @@ export default {
         genres: null,
         pagination: [],
         key: null,
-        pg: 1
+        pg: 1,
+        sortBy: 'release_date.desc',
+        genresFilter: ""
 
 
     }
@@ -111,8 +116,32 @@ export default {
             this.$emit('verMaisBtnClicked', item);
         },
 
-        filterChange(event) {
-            console.log(event.target.value)
+        filterSortByChange(event) {
+            console.log(event.target.value);
+            this.pg = 1;
+
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR&sort_by=' + event.target.value + '&include_adult=false&include_video=false&page='+ this.pg + '&with_genres=' + this.genresFilter )
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.movies = resp.data.results;
+                }
+            }) 
+
+            
+        },
+
+        filterGenresChange(event) {
+            console.log(event.target.value);
+            this.pg = 1;
+
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR&sort_by=' + this.sortBy + '&include_adult=false&include_video=false&page='+ this.pg + '&with_genres=' + event.target.value )
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.movies = resp.data.results;
+                }
+            }) 
+
+            
         },
 
         checkImage( img ){
@@ -128,7 +157,7 @@ export default {
         nextBtnClicked() {            
             this.pg++;            
 
-            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=primary_release_date.desc&include_adult=false&include_video=false&page='+ this.pg)
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=' + this.sortBy + '&include_adult=false&include_video=false&page='+ this.pg)
                 .then((resp) => {
                     if(resp.status === 200) {
                     this.movies = resp.data.results;
@@ -139,7 +168,7 @@ export default {
         prevBtnClicked() {
             this.pg--;            
 
-            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=primary_release_date.desc&include_adult=false&include_video=false&page='+ this.pg)
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=' + this.sortBy + '&include_adult=false&include_video=false&page='+ this.pg)
                 .then((resp) => {
                     if(resp.status === 200) {
                     this.movies = resp.data.results;

@@ -6,15 +6,10 @@
     <div class="row justify-content-center">
 
         <div class="card mb-3" style="max-width: 840px;">
-
             <br>
-
             <h1 class="card-title">{{ this.value.original_title }}</h1>
-
             <hr>
-
             <div class="row no-gutters">
-
                 <div class="col-md-4">
                     <img :src='checkImage( this.value.poster_path )' class="card-img" alt="">
                 </div>
@@ -32,10 +27,10 @@
 
                             <hr>
 
-                            <div class="row">
-                                <p class="col card-text">{{ this.value.vote_count }}</p>
-                                <p class="col card-text">{{ this.value.vote_average }}</p>
-                                <p class="col card-text">{{ this.value.popularity }}</p>
+                            <div class="row m0">
+                                <i class="fas fa-heart"></i><p class="col card-text">{{ this.value.vote_count }}</p>
+                                <i class="fas fa-star"></i><p class="col card-text">{{ this.value.vote_average }}</p>
+                                <i class="fas fa-user-friends"></i><p class="col card-text">{{ this.value.popularity }}</p>
                             </div>
 
                             <hr>
@@ -46,7 +41,7 @@
                                     <ul class="list-group">
                                         <li class="list-group-item active">CAST</li>
                                         <li v-for="actors in cast" :key="actors.id" class="list-group-item">{{ actors.name }}</li>
-                                        <li v-if="cast == null" class="list-group-item list-group-item-secondary"> Não foi encontrado nenhum ator. </li>
+                                        <li v-if='cast == ""' class="list-group-item list-group-item-secondary">Não foi encontrado nenhum cast. </li>
 
                                     </ul>
 
@@ -154,6 +149,11 @@ export default {
         padding-top: 15px;
         padding-bottom: 15px;
     }
+
+    .m0{
+        margin-left: 0px;
+    }
+
 
     .content{
         margin-top: 50px;

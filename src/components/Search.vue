@@ -1,34 +1,48 @@
 <template>
   <div class="content">
 
-    Busca pela palavra chave: {{ $route.params.value }}
-
-    {{this.componentKey}}
+    <h3 class="text-light"> Busca pela palavra chave: " {{ $route.params.value }} "</h3>
 
     <div class="content">
 
-    <div class="col-6 ml-auto">
-        <select @change="filterChange($event)" class="form-control filter" v-model="filter">
-            <option value="" disabled selected>Filtrar por Gênero</option>
-            
-            <option v-for="genre in genres" :value="genre.id" :key="genre.id"> {{ genre.name }} </option>
-        </select>
-        
-    </div>
+        <div class="container">
+
+            <div class="row">
+                <div class="col-5 mr-auto">
+                    <label for="genreCheckbox" class="text-light">Ordernação filmes</label>
+                    <select @change="filterSortByChange($event)" class="form-control filter" v-model="sortBy" name="genreCheckbox">
+                        
+                        <option value="original_title.asc">Ordem alfabética</option>
+                        <option value="release_date.desc">Ultimos lançamentos</option>
+                        <option value="popularity.desc">Popularidade</option>
+                        <option value="vote_average.desc">Avaliação</option>
+                    </select>        
+                </div>
+
+                <div class="col-5 ml-auto">
+                    <label for="genreCheckbox" class="text-light"> Filtrar por Gênero</label>
+                    <select @change="filterGenresChange($event)" class="form-control filter" v-model="genresFilter" name="genreCheckbox">
+                        
+                        <option v-for="genre in genres" :value="genre.id" :key="genre.id"> {{ genre.name }} </option>
+                    </select>        
+                </div>
+            </div>
+        </div>
+
 
     <br>
 
-    <div class="container" :key="componentKey">
+    <div class="container">
         <ul>    
             <div class="row">
                 <li v-for="item in value" class="col-3 item-filme pad15" v-bind:key="item.id" >            
                     <div class="card" >
                         <div ></div>
-                        <img v-if="item.poster_path" class="card-img-top img-fluid" :src='"http://image.tmdb.org/t/p/w500/" + item.poster_path' :alt="item.title">
+                        <img class="card-img-top img-fluid" :src="checkImage( item.poster_path )" :alt="item.title">
                         <div class="card-body">
                             <h5 class="card-title">{{ item.original_title }}</h5>
                             <div>
-                                <i>star</i>
+                                <i class="fas fa-star"></i>
                                 <p class="card-text">{{ item.vote_average.toFixed(2) }}</p>
                             </div>
                         </div>               
@@ -41,14 +55,14 @@
         </ul>
     </div>
 
-    <!-- <ul id="pagination">
+    <ul id="pagination" class="row justify-content-around">
         <li class="pagination-item">
-            <button href="#" @click="prevBtnClicked" type="button" :disabled="pg <= 1" >Anterior</button>
+            <button href="#" @click="prevBtnClicked" type="button" :disabled="pg <= 1" class="btn btn-light">Anterior</button>
         </li>
         <li class="pagination-item">
-            <button href="#" @click="nextBtnClicked" type="button" >Próxima</button>
+            <button href="#" @click="nextBtnClicked" type="button" class="btn btn-light">Próxima</button>
         </li>
-    </ul> -->
+    </ul> 
  
     
   </div>
@@ -60,30 +74,29 @@
 
 <script>
 export default {
-  props: {
-    componentKey: {
-            type: Number,
-            default: 1
-        },
-  },
 
-  data() {
-    return {
-      routeParams: null,
-      value: null,
-      filter: null,
-      genres: null,
+    data() {
+        return {
+            routeParams: null,
+            value: null,
+            filter: null,
+            genres: null,
+            sortBy: "",
+            pg: 1,
+            genresFilter: ""
 
-    }
-  },
+        }
+    },
 
-
-    beforeCreate() {
-
+    created() {
         console.log(this.$route.params.value);
+        this.getMovies();
+        this.getGenres();     
+    },
 
-
-        this.$http.get("https://api.themoviedb.org/3/search/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR&query=" + this.$route.params.value + "&page=1&include_adult=false")
+    methods:{
+        getMovies() {
+            this.$http.get("https://api.themoviedb.org/3/search/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR&query=" + this.$route.params.value + "&page=1&include_adult=false")
             .then((resp) => {
                 if(resp.status === 200) {
                     this.value = resp.data.results;
@@ -91,25 +104,87 @@ export default {
                 }
             })
 
+        },
 
-        this.$http.get('https://api.themoviedb.org/3/genre/movie/list?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR')
+        getGenres() {
+            this.$http.get('https://api.themoviedb.org/3/genre/movie/list?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR')
             .then((resp) => {
                 if(resp.status === 200) {
                 this.genres = resp.data.genres;
+                    // console.log(this.genres);
+                }
+            })
 
-                // console.log(this.genres);            
+        },
 
-            }
-        })
-    },
+        filterSortByChange(event) {
+            console.log(event.target.value);
+            this.pg = 1;
 
-    methods:{
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR&sort_by=' + event.target.value + '&query=' + this.$route.params.value +' &include_adult=false&include_video=false&page='+ this.pg)
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.value = resp.data.results;
+                }
+            }) 
+
+            
+        },
+
+        filterGenresChange(event) {
+            console.log(event.target.value);
+            this.pg = 1;
+
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-BR&sort_by=' + this.sortBy + '&include_adult=false&include_video=false&page='+ this.pg + '&with_genres=' + event.target.value )
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.value = resp.data.results;
+                }
+            }) 
+
+            
+        },
+
+        nextBtnClicked() {            
+            this.pg++;            
+
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=' + this.sortBy + '&include_adult=false&include_video=false&page='+ this.pg)
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.value = resp.data.results;
+                }
+            })          
+        },
+
+        prevBtnClicked() {
+            this.pg--;            
+
+            this.$http.get('https://api.themoviedb.org/3/discover/movie?api_key=4830d7b7e25fd8f0bb4597ad59bfdd39&language=pt-br&sort_by=' + this.sortBy + '&include_adult=false&include_video=false&page='+ this.pg)
+                .then((resp) => {
+                    if(resp.status === 200) {
+                    this.value = resp.data.results;
+                }
+            })
+        },
+
         getSearchList( value ){
             console.log( value );
+            this.getMovies();
+            this.getGenres(); 
         },
 
         verMaisBtnClicked(item){
             this.$emit('verMaisBtnClicked', item);
+        },
+
+        checkImage( img ){
+            if ( img === null ) {
+                return "/img/no_pic.2f519d5e.jpg";
+            } else {
+                return "http://image.tmdb.org/t/p/w500/" + img;
+            }
+            // return item.poster_path ? "http://image.tmdb.org/t/p/w500/" + item.poster_path : ../assets/no_pic.jpg;
+
         },
 
     }

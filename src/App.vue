@@ -4,10 +4,10 @@
 
     <Header msg="Header" v-on:searchBtnClicked="searchBtnClicked"/>
 
-    <hr>
+    <!-- <hr>
     <router-link to="/">Home</router-link>
     <router-link to="/sobre">Sobre</router-link>
-    <hr>
+    <hr> -->
 
 
     <router-view @verMaisBtnClicked="verMaisBtnClicked" ref="conteudo"></router-view>
@@ -27,6 +27,7 @@ export default {
 
   data () {
       return {
+          id:null
 
       }
   },
@@ -41,7 +42,6 @@ export default {
     },
 
     searchBtnClicked( value ){
-
         this.$router.push({ path: '/search/' + value });
         this.$refs.conteudo.getSearchList( value );
 
